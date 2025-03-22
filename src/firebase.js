@@ -3,13 +3,13 @@ import { getFirestore } from "firebase/firestore";
 
 // Firebaseの設定
 const firebaseConfig = {
-  apiKey: "AIzaSyCi9zffZ9DKqlH20MlYlMOdgIcgyWYsqdk",
-  authDomain: "history-9a233.firebaseapp.com",
-  projectId: "history-9a233",
-  storageBucket: "history-9a233.appspot.com", // ここを修正
-  messagingSenderId: "628189169902",
-  appId: "1:628189169902:web:fc8d5279045f1771498bff",
-  measurementId: "G-D1T96ND9ZE"
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID,
+  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID
 };
 
 // Firebaseの初期化

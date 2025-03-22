@@ -1,0 +1,16 @@
+// Firestoreセキュリティルール
+// Firebase Consoleの「Firestore Database」→「ルール」タブに設定してください
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /questions/{questionId} {
+      // 誰でも読み取り可能
+      allow read: if true;
+      
+      // 書き込みはアプリからのリクエストのみ許可
+      // リファラーを検証してGitHub Pagesからのアクセスのみ許可
+      allow write: if request.headers.referer.matches('https://4hey4hey.github.io/histryapp/.*');
+    }
+  }
+}
