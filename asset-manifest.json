@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/histryapp/static/css/main.be4a59e7.css",
-    "main.js": "/histryapp/static/js/main.e70941ad.js",
+    "main.css": "/histryapp/static/css/main.20e33d12.css",
+    "main.js": "/histryapp/static/js/main.f5ea8761.js",
     "index.html": "/histryapp/index.html",
-    "main.be4a59e7.css.map": "/histryapp/static/css/main.be4a59e7.css.map",
-    "main.e70941ad.js.map": "/histryapp/static/js/main.e70941ad.js.map"
+    "main.20e33d12.css.map": "/histryapp/static/css/main.20e33d12.css.map",
+    "main.f5ea8761.js.map": "/histryapp/static/js/main.f5ea8761.js.map"
   },
   "entrypoints": [
-    "static/css/main.be4a59e7.css",
-    "static/js/main.e70941ad.js"
+    "static/css/main.20e33d12.css",
+    "static/js/main.f5ea8761.js"
   ]
 }
