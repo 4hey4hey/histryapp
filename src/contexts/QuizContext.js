@@ -1,5 +1,5 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import { collection, getDocs, doc, setDoc, deleteDoc, query, orderBy } from 'firebase/firestore';
+import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
+import { collection, getDocs, doc, setDoc, deleteDoc, query } from 'firebase/firestore';
 import { db } from '../firebase';
 
 const QuizContext = createContext();
@@ -83,7 +83,8 @@ export function QuizProvider({ children }) {
   };
 
   // 初期データをFirestoreにロードする関数
-  const loadInitialData = async () => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const loadInitialData = useCallback(async () => {
     try {
       console.log('初期データの登録を開始します...');
       console.log('Firestoreの接続状態:', db ? 'DBインスタンスが存在します' : 'DBインスタンスが存在しません');
@@ -109,9 +110,10 @@ export function QuizProvider({ children }) {
     } catch (error) {
       console.error('初期データの登録に失敗しました:', error);
     }
-  };
+  }, []);
 
   // 初期データ読み込み
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const loadQuestions = async () => {
       setLoading(true);
@@ -148,7 +150,7 @@ export function QuizProvider({ children }) {
     };
 
     loadQuestions();
-  }, []);
+  }, [loadInitialData]);
 
   // 問題追加・更新
   const saveQuestion = async (question) => {

@@ -5,6 +5,33 @@ import { useQuiz } from '../contexts/QuizContext';
 const HistoryQuizApp = () => {
   const { questions, loading } = useQuiz();
   
+  // ステート
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [selectedAnswer, setSelectedAnswer] = useState(null);
+  const [showResult, setShowResult] = useState(false);
+  const [score, setScore] = useState(0);
+  const [quizCompleted, setQuizCompleted] = useState(false);
+  const [timer, setTimer] = useState(30);
+  const [timerActive, setTimerActive] = useState(true);
+  const [showIntro, setShowIntro] = useState(true);
+  const [animation, setAnimation] = useState(false);
+  
+  // タイマーの効果
+  useEffect(() => {
+    let interval = null;
+    
+    if (timerActive && timer > 0) {
+      interval = setInterval(() => {
+        setTimer((prevTimer) => prevTimer - 1);
+      }, 1000);
+    } else if (timer === 0 && !showResult) {
+      setShowResult(true);
+      setTimerActive(false);
+    }
+    
+    return () => clearInterval(interval);
+  }, [timerActive, timer, showResult]);
+  
   // ローディング中の表示
   if (loading) {
     return (
@@ -20,17 +47,6 @@ const HistoryQuizApp = () => {
   
   // クイズの問題データ - コンテキストから取得
   const quizData = questions;
-
-  // ステート
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState(null);
-  const [showResult, setShowResult] = useState(false);
-  const [score, setScore] = useState(0);
-  const [quizCompleted, setQuizCompleted] = useState(false);
-  const [timer, setTimer] = useState(30);
-  const [timerActive, setTimerActive] = useState(true);
-  const [showIntro, setShowIntro] = useState(true);
-  const [animation, setAnimation] = useState(false);
 
   // 回答選択時の処理
   const handleAnswerSelect = (answer) => {
@@ -77,22 +93,6 @@ const HistoryQuizApp = () => {
   const startQuiz = () => {
     setShowIntro(false);
   };
-
-  // タイマーの効果
-  useEffect(() => {
-    let interval = null;
-    
-    if (timerActive && timer > 0) {
-      interval = setInterval(() => {
-        setTimer((prevTimer) => prevTimer - 1);
-      }, 1000);
-    } else if (timer === 0 && !showResult) {
-      setShowResult(true);
-      setTimerActive(false);
-    }
-    
-    return () => clearInterval(interval);
-  }, [timerActive, timer, showResult]);
 
   // イントロ画面
   if (showIntro) {

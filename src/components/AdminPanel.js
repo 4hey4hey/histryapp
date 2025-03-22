@@ -5,6 +5,11 @@ import { Save, Plus, Edit2, Trash2, ChevronLeft, FileText, Settings, Search, Loa
 const AdminPanel = () => {
   // ステート管理
   const { questions, saveQuestion, deleteQuestion, resetQuestions, loading } = useQuiz();
+  const [currentQuestion, setCurrentQuestion] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState("questions");
+  const [showPreview, setShowPreview] = useState(false);
   
   // ローディング中の表示
   if (loading) {
@@ -18,11 +23,6 @@ const AdminPanel = () => {
       </div>
     );
   }
-  const [currentQuestion, setCurrentQuestion] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState("questions");
-  const [showPreview, setShowPreview] = useState(false);
 
   // QuizContextからデータを取得するようにしたので、初期化のコードは削除
 
