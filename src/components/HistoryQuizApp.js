@@ -3,7 +3,20 @@ import { AlertCircle, CheckCircle, ChevronRight, Clock, Award, RotateCcw, BookOp
 import { useQuiz } from '../contexts/QuizContext';
 
 const HistoryQuizApp = () => {
-  const { questions } = useQuiz();
+  const { questions, loading } = useQuiz();
+  
+  // ローディング中の表示
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 to-black p-4 text-white">
+        <div className="max-w-md w-full bg-gray-800/90 backdrop-blur-md rounded-2xl p-8 shadow-xl border border-gray-700 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <p className="text-xl font-bold">データを読み込み中...</p>
+          <p className="text-gray-400 mt-2">少々お待ちください</p>
+        </div>
+      </div>
+    );
+  }
   
   // クイズの問題データ - コンテキストから取得
   const quizData = questions;

@@ -8,7 +8,7 @@ import './App.css';
 function App() {
   return (
     <QuizProvider>
-      <BrowserRouter>
+      <BrowserRouter basename="/histryapp">
         <div className="App">
           {/* X Logo Background */}
           <div className="x-logo-background">X</div>

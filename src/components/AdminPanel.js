@@ -1,10 +1,23 @@
 import React, { useState } from 'react';
 import { useQuiz } from '../contexts/QuizContext';
-import { Save, Plus, Edit2, Trash2, ChevronLeft, FileText, Settings, Search } from 'lucide-react';
+import { Save, Plus, Edit2, Trash2, ChevronLeft, FileText, Settings, Search, Loader } from 'lucide-react';
 
 const AdminPanel = () => {
   // ステート管理
-  const { questions, saveQuestion, deleteQuestion, resetQuestions } = useQuiz();
+  const { questions, saveQuestion, deleteQuestion, resetQuestions, loading } = useQuiz();
+  
+  // ローディング中の表示
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-800 flex items-center justify-center">
+        <div className="bg-gray-700 rounded-lg shadow-md p-8 max-w-md w-full text-center">
+          <Loader className="h-12 w-12 animate-spin mx-auto text-white mb-4" />
+          <h2 className="text-xl font-bold text-white mb-2">データを読み込み中...</h2>
+          <p className="text-gray-300">管理パネルの準備中です。少々お待ちください。</p>
+        </div>
+      </div>
+    );
+  }
   const [currentQuestion, setCurrentQuestion] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
