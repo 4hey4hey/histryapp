@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/histryapp/static/css/main.84bdb339.css",
+    "main.js": "/histryapp/static/js/main.b9b252b9.js",
+    "index.html": "/histryapp/index.html",
+    "main.84bdb339.css.map": "/histryapp/static/css/main.84bdb339.css.map",
+    "main.b9b252b9.js.map": "/histryapp/static/js/main.b9b252b9.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.84bdb339.css",
+    "static/js/main.b9b252b9.js"
+  ]
+}
