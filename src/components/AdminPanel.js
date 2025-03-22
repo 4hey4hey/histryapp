@@ -11,8 +11,8 @@ const AdminPanel = () => {
   const [activeTab, setActiveTab] = useState("questions");
   const [showPreview, setShowPreview] = useState(false);
   
-  // 前回のコード続き
-              3 py-2 border border-gray-600 bg-gray-800 text-white rounded-md"
+  // 以前のコード続き
+  className={"w-full px-3 py-2 border border-gray-600 bg-gray-800 text-white rounded-md"};
                   placeholder="絵文字またはアイコン（例：📚, ⚔️, 🏯）"
                 />
               </div>
