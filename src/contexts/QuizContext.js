@@ -1,5 +1,13 @@
 import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
-import { collection, getDocs, doc, setDoc, deleteDoc, query } from 'firebase/firestore';
+import { 
+  collection, 
+  getDocs, 
+  doc, 
+  setDoc, 
+  deleteDoc, 
+  query, 
+  onSnapshot 
+} from 'firebase/firestore';
 import { db } from '../firebase';
 
 const QuizContext = createContext();
@@ -56,181 +64,105 @@ export function QuizProvider({ children }) {
     }
   ];
 
-  // Firestoreから問題データを取得する関数
-  const fetchQuestionsFromFirestore = async () => {
+  // Firestoreから問題を取得
+  const fetchQuestionsFromFirestore = useCallback(async () => {
     try {
-      console.log('Firestoreからデータを取得しています...');
       const q = query(collection(db, 'questions'));
-      const snapshot = await getDocs(q);
       
-      if (snapshot.empty) {
-        console.log('Firestore内のquestionsコレクションが空です。初期データを登録します。');
-        return [];
-      }
-      
-      const questionsData = [];
-      snapshot.forEach(doc => {
-        console.log('ドキュメントを取得:', doc.id, doc.data());
-        questionsData.push({ ...doc.data(), id: doc.id });
+      // リアルタイムリスナーを設定
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const fetchedQuestions = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        
+        setQuestions(fetchedQuestions);
+        setLoading(false);
       });
-      
-      console.log('取得したデータ:', questionsData);
-      return questionsData;
-    } catch (error) {
-      console.error('Firestoreからの問題取得に失敗しました:', error);
-      return [];
-    }
-  };
 
-  // 初期データをFirestoreにロードする関数
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const loadInitialData = useCallback(async () => {
-    try {
-      console.log('初期データの登録を開始します...');
-      console.log('Firestoreの接続状態:', db ? 'DBインスタンスが存在します' : 'DBインスタンスが存在しません');
-      
-      // まずコレクションが存在するか確認
-      try {
-        await getDocs(collection(db, 'questions'));
-        console.log('questionsコレクションにアクセスできました');
-      } catch (e) {
-        console.error('questionsコレクションへのアクセス中にエラーが発生しました:', e);
-      }
-      
-      for (const question of defaultQuestions) {
-        console.log('問題を登録します:', question.id);
-        try {
-          await setDoc(doc(db, 'questions', question.id), question);
-          console.log('ドキュメントを正常に登録しました:', question.id);
-        } catch (e) {
-          console.error('ドキュメントの登録中にエラーが発生しました:', e);
-        }
-      }
-      console.log('初期データの登録が完了しました');
+      // コンポーネントのアンマウント時にリスナーを解除
+      return () => unsubscribe();
     } catch (error) {
-      console.error('初期データの登録に失敗しました:', error);
+      console.error('問題の取得に失敗:', error);
+      setLoading(false);
+      return [];
     }
   }, []);
 
-  // 初期データ読み込み
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // 初期データの読み込み
   useEffect(() => {
     const loadQuestions = async () => {
       setLoading(true);
       try {
-        console.log('データの読み込みを開始します...');
+        const snapshot = await getDocs(collection(db, 'questions'));
         
-        // 当面は強制的に初期データをロードしてみる
-        console.log('初期データをFirestoreに登録します...');
-        await loadInitialData();
-        
-        console.log('データを再度取得します...');
-        const questionsData = await fetchQuestionsFromFirestore();
-        
-        if (questionsData.length > 0) {
-          console.log('データを取得できました:', questionsData.length);
-          setQuestions(questionsData);
-        } else {
-          console.log('取得したデータが空です。デフォルトデータを使用します');
-          setQuestions(defaultQuestions);
-          localStorage.setItem('quizQuestions', JSON.stringify(defaultQuestions));
+        // コレクションが空の場合、デフォルトデータを登録
+        if (snapshot.empty) {
+          console.log('問題データが空です。デフォルトデータを登録します。');
+          const savePromises = defaultQuestions.map(question => 
+            setDoc(doc(db, 'questions', question.id), question)
+          );
+          await Promise.all(savePromises);
         }
+        
+        await fetchQuestionsFromFirestore();
       } catch (error) {
-        console.error('問題データの読み込みに失敗しました:', error);
-        // エラー時はローカルストレージからフォールバック
-        const storedQuestions = localStorage.getItem('quizQuestions');
-        if (storedQuestions) {
-          setQuestions(JSON.parse(storedQuestions));
-        } else {
-          setQuestions(defaultQuestions);
-        }
+        console.error('データの読み込みに失敗:', error);
       } finally {
         setLoading(false);
       }
     };
 
     loadQuestions();
-  }, [loadInitialData]);
+  }, [fetchQuestionsFromFirestore]);
 
-  // 問題追加・更新
+  // 問題の保存
   const saveQuestion = async (question) => {
     try {
-      // 新規問題の場合はIDを生成
+      // IDがない場合は新規作成、ある場合は上書き
       const questionId = question.id || Date.now().toString();
-      const questionWithId = { ...question, id: questionId };
-      
+      const questionToSave = {
+        ...question,
+        id: questionId
+      };
+
       // Firestoreに保存
-      await setDoc(doc(db, 'questions', questionId), questionWithId);
+      await setDoc(doc(db, 'questions', questionId), questionToSave);
       
-      // ローカルステートを更新
-      setQuestions(prevQuestions => {
-        const exists = prevQuestions.some(q => q.id === questionId);
-        if (exists) {
-          return prevQuestions.map(q => q.id === questionId ? questionWithId : q);
-        } else {
-          return [...prevQuestions, questionWithId];
-        }
-      });
-      
-      // フォールバック用にローカルストレージにも保存
-      localStorage.setItem('quizQuestions', JSON.stringify(
-        questions.map(q => q.id === questionId ? questionWithId : q).concat(
-          questions.some(q => q.id === questionId) ? [] : [questionWithId]
-        )
-      ));
-      
-      return questionWithId;
+      return questionToSave;
     } catch (error) {
-      console.error('問題の保存に失敗しました:', error);
+      console.error('問題の保存に失敗:', error);
       throw error;
     }
   };
 
-  // 問題削除
+  // 問題の削除
   const deleteQuestion = async (id) => {
     try {
-      // Firestoreから削除
       await deleteDoc(doc(db, 'questions', id.toString()));
-      
-      // ローカルステートを更新
-      const updatedQuestions = questions.filter(q => q.id !== id);
-      setQuestions(updatedQuestions);
-      
-      // フォールバック用にローカルストレージも更新
-      localStorage.setItem('quizQuestions', JSON.stringify(updatedQuestions));
     } catch (error) {
-      console.error('問題の削除に失敗しました:', error);
+      console.error('問題の削除に失敗:', error);
       throw error;
     }
   };
 
-  // データリセット
+  // データのリセット
   const resetQuestions = async () => {
     try {
-      setLoading(true);
-      
-      // 現在のすべての問題をFirestoreから削除
+      // 既存のすべての問題を削除
       const snapshot = await getDocs(collection(db, 'questions'));
-      const deletePromises = [];
-      snapshot.forEach(doc => {
-        deletePromises.push(deleteDoc(doc.ref));
-      });
+      const deletePromises = snapshot.docs.map(doc => deleteDoc(doc.ref));
       await Promise.all(deletePromises);
-      
-      // デフォルトデータを再登録
-      await loadInitialData();
-      
-      // 最新のデータを取得して状態を更新
-      const newQuestions = await fetchQuestionsFromFirestore();
-      setQuestions(newQuestions);
-      
-      // フォールバック用にローカルストレージも更新
-      localStorage.setItem('quizQuestions', JSON.stringify(newQuestions));
+
+      // デフォルト問題を保存
+      const savePromises = defaultQuestions.map(question => 
+        setDoc(doc(db, 'questions', question.id), question)
+      );
+      await Promise.all(savePromises);
+
     } catch (error) {
-      console.error('データのリセットに失敗しました:', error);
+      console.error('データのリセットに失敗:', error);
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 
